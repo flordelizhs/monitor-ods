@@ -5,7 +5,7 @@
 
 <meta charset="UTF-8">
 
-<title>WarRoom Seguridad TI - INEI</title>
+<title>WarRoom Seguridad TI</title>
 
 <style>
 
@@ -181,10 +181,10 @@ body{
 
 <div class="header">
 
-<h1>WarRoom Seguridad TI - INEI</h1>
+<h1>WarRoom Seguridad TI</h1>
 
 <div class="sub">
-Monitor de Sistemas Críticos Institucionales
+Monitoreo de Sistemas Críticos
 </div>
 
 </div>
@@ -192,7 +192,7 @@ Monitor de Sistemas Críticos Institucionales
 <div class="grid" id="grid"></div>
 
 <div class="footer">
-Monitoreo 2026
+Monitoreo de Lanzamiento ODS: 06 y 07 de Mayo 2026
 </div>
 
 <div class="alertaTexto" id="alertaTexto">
@@ -205,27 +205,27 @@ const sistemas = [
 
 {
 nombre:"ODS",
-url:"https://ods.inei.gob.pe/"
+url:"https://ods.inei.gob.pe"
 },
 
 {
 nombre:"OWA",
-url:"https://economicas2.inei.gob.pe/owa/"
+url:"https://economicas2.inei.gob.pe/owa"
 },
 
 {
 nombre:"SGD",
-url:"https://sgd.inei.gob.pe/sgd/login.do"
+url:"https://sgd.inei.gob.pe"
 },
 
 {
 nombre:"UNETE",
-url:"https://aplications.inei.gob.pe/WebConsecucion/"
+url:"https://aplications.inei.gob.pe/WebConsecucion"
 },
 
 {
 nombre:"CPV25",
-url:"https://censos2025.inei.gob.pe/"
+url:"https://censos2025.inei.gob.pe"
 }
 
 ];
@@ -305,6 +305,24 @@ VALIDANDO
 
 }
 
+async function verificarSistema(url){
+
+return new Promise((resolve,reject)=>{
+
+const img = new Image();
+
+img.onload = () => resolve(true);
+
+img.onerror = () => reject(false);
+
+img.src = url + "/favicon.ico?cache=" + new Date().getTime();
+
+setTimeout(() => reject(false), 4000);
+
+});
+
+}
+
 async function verificar(){
 
 let hayCaidos = false;
@@ -321,9 +339,7 @@ const estado = document.getElementById(`estado-${i}`);
 
 try{
 
-await fetch(sistema.url, {
-mode:'no-cors'
-});
+await verificarSistema(sistema.url);
 
 panel.className = "hex ok";
 
