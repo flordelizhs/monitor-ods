@@ -50,6 +50,7 @@ body{
     width:250px;
     height:220px;
     background:#1e293b;
+
     clip-path: polygon(
       25% 6.7%,
       75% 6.7%,
@@ -105,6 +106,26 @@ body{
     color:#94a3b8;
 }
 
+.alertaTexto{
+
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+
+    font-size:90px;
+    font-weight:bold;
+
+    color:#ff0000;
+
+    animation: blink 1s infinite;
+
+    z-index:9999;
+
+    display:none;
+
+}
+
 </style>
 
 </head>
@@ -124,18 +145,14 @@ Monitor de Sistemas Críticos
 <div class="grid" id="grid"></div>
 
 <div class="footer">
-Monitoreo de sistemas criticos
+Monitoreo de Lanzamiento ODS: 06 y 07 de Mayo 2026
 </div>
 
-<audio id="alarma" loop>
-<source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg">
-</audio>
-
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<div class="alertaTexto" id="alertaTexto">
+⚠ SISTEMA CAÍDO ⚠
+</div>
 
 <script>
-
-emailjs.init("TU_PUBLIC_KEY");
 
 const sistemas = [
 
@@ -166,9 +183,40 @@ url:"https://censos2025.inei.gob.pe/"
 
 ];
 
-let alertaEnviada = {};
-
 const grid = document.getElementById("grid");
+
+function hablarAlerta(){
+
+const mensaje = new SpeechSynthesisUtterance(
+"Alerta. Sistema caído. Revisar."
+);
+
+mensaje.lang = "es-ES";
+
+mensaje.rate = 0.9;
+
+mensaje.pitch = 1.2;
+
+const voces = speechSynthesis.getVoices();
+
+const vozFemenina = voces.find(
+v =>
+v.name.includes("Female") ||
+v.name.includes("female") ||
+v.name.includes("Paulina") ||
+v.name.includes("Helena") ||
+v.name.includes("Google")
+);
+
+if(vozFemenina){
+
+mensaje.voice = vozFemenina;
+
+}
+
+speechSynthesis.speak(mensaje);
+
+}
 
 function crearPanel(){
 
@@ -218,8 +266,6 @@ panel.className = "hex ok";
 
 estado.innerHTML = "OPERATIVO";
 
-alertaEnviada[sistema.nombre] = false;
-
 }
 catch(error){
 
@@ -229,14 +275,6 @@ panel.className = "hex down";
 
 estado.innerHTML = "CAÍDO";
 
-if(!alertaEnviada[sistema.nombre]){
-
-enviarCorreo(sistema.nombre);
-
-alertaEnviada[sistema.nombre] = true;
-
-}
-
 }
 
 }
@@ -245,29 +283,18 @@ if(hayCaidos){
 
 document.body.style.background="#3f0000";
 
-document.getElementById("alarma").play();
+document.getElementById("alertaTexto").style.display="block";
+
+hablarAlerta();
 
 }
 else{
 
 document.body.style.background="#0f172a";
 
-document.getElementById("alarma").pause();
+document.getElementById("alertaTexto").style.display="none";
 
 }
-
-}
-
-function enviarCorreo(sistema){
-
-emailjs.send(
-"TU_SERVICE_ID",
-"TU_TEMPLATE_ID",
-{
-sistema:sistema,
-mensaje:`El sistema ${sistema} se encuentra caído`
-}
-);
 
 }
 
