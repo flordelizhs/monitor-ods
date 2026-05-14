@@ -7,6 +7,10 @@
 
 <title>WarRoom Seguridad TI</title>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
 
 body{
@@ -40,13 +44,13 @@ body{
 
     display:grid;
 
-    grid-template-columns:repeat(auto-fit, minmax(260px, 260px));
+    grid-template-columns:repeat(auto-fit, minmax(240px, 240px));
 
     justify-content:center;
 
-    gap:40px;
+    gap:35px;
 
-    margin-top:70px;
+    margin-top:50px;
 
     padding:20px;
 
@@ -54,8 +58,8 @@ body{
 
 .hex{
 
-    width:260px;
-    height:230px;
+    width:240px;
+    height:210px;
 
     background:#1e293b;
 
@@ -92,17 +96,15 @@ body{
 
     transform:scale(1.05);
 
-    box-shadow:0 0 35px #2563eb;
+    box-shadow:0 0 35px #ffffff;
 
 }
 
 .nombre{
 
-    font-size:30px;
+    font-size:26px;
 
     font-weight:bold;
-
-    letter-spacing:2px;
 
     text-align:center;
 
@@ -114,7 +116,7 @@ body{
 
     margin-top:15px;
 
-    font-size:22px;
+    font-size:20px;
 
     font-weight:bold;
 
@@ -122,39 +124,29 @@ body{
 
 .link{
 
-    margin-top:15px;
+    margin-top:10px;
 
-    font-size:14px;
+    font-size:13px;
 
-    color:#cbd5e1;
-
-    text-align:center;
-
-    width:80%;
-
-    word-break:break-word;
+    color:#e2e8f0;
 
 }
 
 .ok{
 
-    border-color:#22c55e;
-
-    color:#22c55e;
-
-    box-shadow:0 0 30px rgba(34,197,94,0.5);
+    box-shadow:0 0 25px rgba(255,255,255,0.4);
 
 }
 
 .down{
 
-    border-color:#ff0000;
+    border-color:#ff0000 !important;
 
-    color:#ff0000;
+    color:#ff0000 !important;
 
     animation: blink 1s infinite;
 
-    box-shadow:0 0 35px #ff0000;
+    box-shadow:0 0 35px #ff0000 !important;
 
 }
 
@@ -174,9 +166,37 @@ body{
 
 }
 
+.timeline{
+
+    width:96%;
+
+    margin:auto;
+
+    margin-top:40px;
+
+    background:#111827;
+
+    padding:25px;
+
+    border-radius:18px;
+
+    box-shadow:0 0 20px rgba(0,0,0,0.4);
+
+}
+
+.timeline h2{
+
+    text-align:center;
+
+    color:#38bdf8;
+
+    margin-bottom:20px;
+
+}
+
 .footer{
 
-    margin-top:60px;
+    margin-top:40px;
 
     background:#111827;
 
@@ -184,7 +204,7 @@ body{
 
     padding:18px;
 
-    font-size:22px;
+    font-size:20px;
 
     color:#94a3b8;
 
@@ -200,7 +220,7 @@ body{
 
     transform:translate(-50%,-50%);
 
-    font-size:90px;
+    font-size:80px;
 
     font-weight:bold;
 
@@ -214,7 +234,25 @@ body{
 
     text-shadow:0 0 30px #ff0000;
 
-    text-align:center;
+}
+
+.btnPDF{
+
+    background:#2563eb;
+
+    color:white;
+
+    border:none;
+
+    padding:15px 30px;
+
+    font-size:18px;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    box-shadow:0 0 15px rgba(37,99,235,0.5);
 
 }
 
@@ -229,15 +267,31 @@ body{
 <h1>WarRoom Seguridad TI</h1>
 
 <div class="sub">
-Monitoreo de Sistemas Críticos
+Monitoreo Ejecutivo de Sistemas Críticos
 </div>
 
 </div>
 
 <div class="grid" id="grid"></div>
 
+<div class="timeline">
+
+<h2>Línea de Tiempo de Disponibilidad Institucional - INEI</h2>
+
+<canvas id="timelineChart" height="120"></canvas>
+
+</div>
+
+<div style="text-align:center;margin-top:25px;">
+
+<button onclick="exportarPDF()" class="btnPDF">
+📄 Descargar Reporte PDF
+</button>
+
+</div>
+
 <div class="footer">
-SEGURIDAD INFORMETICA - OTIN/INEI - 2026
+SEGURIDAD INFORMATICA - OTIN/INEI - 2026
 </div>
 
 <div class="alertaTexto" id="alertaTexto">
@@ -248,64 +302,123 @@ SEGURIDAD INFORMETICA - OTIN/INEI - 2026
 
 const sistemas = [
 
-{
-nombre:"ODS",
-url:"https://ods.inei.gob.pe"
-},
+{ nombre:"ODS", url:"https://ods.inei.gob.pe" },
+{ nombre:"OWA", url:"https://economicas2.inei.gob.pe" },
+{ nombre:"SGD", url:"https://sgd.inei.gob.pe" },
+{ nombre:"UNETE", url:"https://aplications.inei.gob.pe" },
+{ nombre:"CPV25", url:"https://censos2025.inei.gob.pe" },
+{ nombre:"RENAMU", url:"https://renamu.inei.gob.pe/2026/#/login/mon" },
+{ nombre:"EEA", url:"https://portaleea.inei.gob.pe/" },
+{ nombre:"POS/LAN", url:"https://postcensalcpv.inei.gob.pe/apareamiento-de-datos-epc-frontend/login/login" },
+{ nombre:"CONS/LAN", url:"https://consistenciacpv2025.inei.gob.pe/autenticacion/login" },
+{ nombre:"JORGE", url:"https://webapps.inei.gob.pe/webencal2025/public/" },
+{ nombre:"DEV/YIMMY", url:"https://devresultadoscpv2025.inei.gob.pe/" },
+{ nombre:"DEMO", url:"https://demosistemas.inei.gob.pe/ArchivoCentral/public/login" }
 
-{
-nombre:"OWA",
-url:"https://economicas2.inei.gob.pe"
-},
+];
 
-{
-nombre:"SGD",
-url:"https://sgd.inei.gob.pe"
-},
+const colores = [
 
-{
-nombre:"UNETE",
-url:"https://aplications.inei.gob.pe"
-},
-
-{
-nombre:"CPV25",
-url:"https://censos2025.inei.gob.pe"
-},
-
-{
-nombre:"RENAMU",
-url:"https://renamu.inei.gob.pe/2026/#/login/mon"
-},
-
-{
-nombre:"EEA",
-url:"https://portaleea.inei.gob.pe/"
-},
-
-{
-nombre:"POS/LAN",
-url:"https://postcensalcpv.inei.gob.pe/apareamiento-de-datos-epc-frontend/login/login"
-},
-
-{
-nombre:"CONS/LAN",
-url:"https://consistenciacpv2025.inei.gob.pe/autenticacion/login"
-},
-
-{
-nombre:"JORGE",
-url:"https://webapps.inei.gob.pe/webencal2025/public/"
-},
-
-{
-nombre:"YIMMY-CPV",
-url:"https://devresultadoscpv2025.inei.gob.pe/"
-}
+"#22c55e",
+"#38bdf8",
+"#f59e0b",
+"#e879f9",
+"#f43f5e",
+"#14b8a6",
+"#a855f7",
+"#84cc16",
+"#06b6d4",
+"#fb7185",
+"#f97316",
+"#8b5cf6"
 
 ];
 
 const grid = document.getElementById("grid");
+
+const labelsTiempo = [];
+
+const datasets = sistemas.map((sistema,index)=>({
+
+label:sistema.nombre,
+
+data:[],
+
+borderColor:colores[index],
+
+backgroundColor:colores[index],
+
+borderWidth:3,
+
+tension:0,
+
+fill:false,
+
+pointRadius:3
+
+}));
+
+const ctx = document.getElementById('timelineChart');
+
+const timelineChart = new Chart(ctx, {
+
+type:'line',
+
+data:{
+labels:labelsTiempo,
+datasets:datasets
+},
+
+options:{
+
+responsive:true,
+
+plugins:{
+
+legend:{
+labels:{
+color:'white'
+}
+}
+
+},
+
+scales:{
+
+x:{
+ticks:{
+color:'white'
+}
+},
+
+y:{
+
+min:0,
+max:1,
+
+ticks:{
+
+stepSize:1,
+
+color:'white',
+
+callback:function(value){
+
+return value === 1
+? 'OPERATIVO'
+: 'CAÍDO';
+
+}
+
+}
+
+}
+
+}
+
+}
+
+});
 
 let hablando = false;
 
@@ -325,8 +438,6 @@ nombreSistema +
 " presenta problemas de conectividad.";
 
 mensaje.lang = "es-ES";
-
-mensaje.volume = 1;
 
 mensaje.rate = 0.9;
 
@@ -367,6 +478,11 @@ href="${sistema.url}"
 target="_blank"
 class="hex validando"
 id="panel-${index}"
+
+style="
+border-color:${colores[index]};
+color:${colores[index]};
+"
 >
 
 <div class="nombre">
@@ -439,6 +555,18 @@ let hayCaidos = false;
 
 let sistemasCaidos = [];
 
+const hora = new Date().toLocaleTimeString();
+
+labelsTiempo.push(hora);
+
+if(labelsTiempo.length > 50){
+
+labelsTiempo.shift();
+
+datasets.forEach(ds => ds.data.shift());
+
+}
+
 for(let i=0;i<sistemas.length;i++){
 
 const sistema = sistemas[i];
@@ -451,9 +579,15 @@ try{
 
 await verificarSistema(sistema.url);
 
-panel.className = "hex ok";
+panel.classList.remove("down");
+
+panel.style.borderColor = colores[i];
+
+panel.style.color = colores[i];
 
 estado.innerHTML = "OPERATIVO";
+
+datasets[i].data.push(1);
 
 }
 catch(error){
@@ -462,13 +596,17 @@ hayCaidos = true;
 
 sistemasCaidos.push(sistema.nombre);
 
-panel.className = "hex down";
+panel.classList.add("down");
 
 estado.innerHTML = "SIN RESPUESTA";
 
+datasets[i].data.push(0);
+
 }
 
 }
+
+timelineChart.update();
 
 if(hayCaidos){
 
@@ -486,6 +624,92 @@ document.body.style.background="#0f172a";
 document.getElementById("alertaTexto").style.display="none";
 
 }
+
+}
+
+function exportarPDF(){
+
+const { jsPDF } = window.jspdf;
+
+const doc = new jsPDF();
+
+const fecha = new Date().toLocaleString();
+
+let y = 20;
+
+doc.setFontSize(20);
+
+doc.text("WarRoom Seguridad TI", 20, y);
+
+y += 12;
+
+doc.setFontSize(12);
+
+doc.text("Reporte Ejecutivo de Disponibilidad", 20, y);
+
+y += 10;
+
+doc.text("Fecha de generación: " + fecha, 20, y);
+
+y += 20;
+
+doc.setFontSize(11);
+
+sistemas.forEach((sistema,index)=>{
+
+const ultimoEstado = datasets[index].data[
+ datasets[index].data.length -1
+] === 1
+? "OPERATIVO"
+: "SIN RESPUESTA";
+
+const disponibilidad = (
+(
+ datasets[index].data.filter(v => v === 1).length
+ /
+ Math.max(datasets[index].data.length,1)
+) * 100
+).toFixed(2);
+
+if(y > 260){
+
+ doc.addPage();
+ y = 20;
+
+}
+
+if(ultimoEstado === "OPERATIVO"){
+
+ doc.setTextColor(0,128,0);
+
+}else{
+
+ doc.setTextColor(255,0,0);
+
+}
+
+const texto =
+`${sistema.nombre} | Estado: ${ultimoEstado} | Disponibilidad: ${disponibilidad}%`;
+
+doc.text(texto,20,y);
+
+y += 10;
+
+});
+
+doc.setTextColor(0,0,0);
+
+y += 20;
+
+doc.setFontSize(10);
+
+doc.text(
+"Reporte generado automáticamente por WarRoom Seguridad TI",
+20,
+y
+);
+
+doc.save("Reporte_Disponibilidad_WarRoom.pdf");
 
 }
 
