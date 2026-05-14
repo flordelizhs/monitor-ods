@@ -80,11 +80,11 @@ body{
 
     align-items:center;
 
-    border:5px solid #64748b;
+    border:4px solid #475569;
 
     transition:0.4s;
 
-    box-shadow:0 0 25px rgba(0,0,0,0.4);
+    box-shadow:0 0 20px rgba(0,0,0,0.3);
 
     cursor:pointer;
 
@@ -94,9 +94,9 @@ body{
 
 .hex:hover{
 
-    transform:scale(1.05);
+    transform:scale(1.03);
 
-    box-shadow:0 0 35px #ffffff;
+    box-shadow:0 0 25px #2563eb;
 
 }
 
@@ -110,6 +110,8 @@ body{
 
     padding:0 10px;
 
+    transition:0.3s;
+
 }
 
 .estado{
@@ -120,6 +122,8 @@ body{
 
     font-weight:bold;
 
+    transition:0.3s;
+
 }
 
 .link{
@@ -128,13 +132,20 @@ body{
 
     font-size:13px;
 
-    color:#e2e8f0;
+    color:#cbd5e1;
 
 }
 
 .ok{
 
-    box-shadow:0 0 25px rgba(255,255,255,0.4);
+    border-color:#22c55e;
+
+}
+
+.ok .nombre,
+.ok .estado{
+
+    color:#22c55e;
 
 }
 
@@ -142,17 +153,27 @@ body{
 
     border-color:#ff0000 !important;
 
-    color:#ff0000 !important;
-
     animation: blink 1s infinite;
 
-    box-shadow:0 0 35px #ff0000 !important;
+    box-shadow:0 0 25px #ff0000 !important;
+
+}
+
+.down .nombre,
+.down .estado{
+
+    color:#ff0000 !important;
 
 }
 
 .validando{
 
     border-color:#facc15;
+
+}
+
+.validando .nombre,
+.validando .estado{
 
     color:#facc15;
 
@@ -172,11 +193,11 @@ body{
 
     margin:auto;
 
-    margin-top:40px;
+    margin-top:30px;
 
     background:#111827;
 
-    padding:25px;
+    padding:20px;
 
     border-radius:18px;
 
@@ -190,13 +211,13 @@ body{
 
     color:#38bdf8;
 
-    margin-bottom:20px;
+    margin-bottom:15px;
 
 }
 
 .footer{
 
-    margin-top:40px;
+    margin-top:35px;
 
     background:#111827;
 
@@ -276,9 +297,9 @@ Monitoreo Ejecutivo de Sistemas Críticos
 
 <div class="timeline">
 
-<h2>Línea de Tiempo de Disponibilidad Institucional - INEI</h2>
+<h2>Línea de Tiempo de Disponibilidad Institucional</h2>
 
-<canvas id="timelineChart" height="120"></canvas>
+<canvas id="timelineChart" height="80"></canvas>
 
 </div>
 
@@ -348,13 +369,13 @@ borderColor:colores[index],
 
 backgroundColor:colores[index],
 
-borderWidth:3,
+borderWidth:2,
 
 tension:0,
 
 fill:false,
 
-pointRadius:3
+pointRadius:2
 
 }));
 
@@ -377,7 +398,8 @@ plugins:{
 
 legend:{
 labels:{
-color:'white'
+color:'white',
+boxWidth:12
 }
 }
 
@@ -387,7 +409,11 @@ scales:{
 
 x:{
 ticks:{
-color:'white'
+color:'white',
+maxTicksLimit:10
+},
+grid:{
+color:"rgba(255,255,255,0.05)"
 }
 },
 
@@ -398,18 +424,22 @@ max:1,
 
 ticks:{
 
-stepSize:1,
+stepSize:0.5,
 
 color:'white',
 
 callback:function(value){
 
-return value === 1
-? 'OPERATIVO'
-: 'CAÍDO';
+if(value == 1) return 'UP';
+if(value == 0) return 'DOWN';
+return '';
 
 }
 
+},
+
+grid:{
+color:"rgba(255,255,255,0.05)"
 }
 
 }
@@ -478,11 +508,6 @@ href="${sistema.url}"
 target="_blank"
 class="hex validando"
 id="panel-${index}"
-
-style="
-border-color:${colores[index]};
-color:${colores[index]};
-"
 >
 
 <div class="nombre">
@@ -579,11 +604,10 @@ try{
 
 await verificarSistema(sistema.url);
 
+panel.classList.remove("validando");
 panel.classList.remove("down");
 
-panel.style.borderColor = colores[i];
-
-panel.style.color = colores[i];
+panel.classList.add("ok");
 
 estado.innerHTML = "OPERATIVO";
 
@@ -595,6 +619,9 @@ catch(error){
 hayCaidos = true;
 
 sistemasCaidos.push(sistema.nombre);
+
+panel.classList.remove("validando");
+panel.classList.remove("ok");
 
 panel.classList.add("down");
 
@@ -704,7 +731,7 @@ y += 20;
 doc.setFontSize(10);
 
 doc.text(
-"Reporte generado automáticamente por WarRoom Seguridad TI",
+"Reporte generado automáticamente por WarRoom Seguridad TI -OTIN",
 20,
 y
 );
